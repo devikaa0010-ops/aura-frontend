@@ -1,0 +1,17 @@
+{
+  "name": "Aura Journal",
+  "short_name": "Aura",
+  "description": "Your beautiful, secure digital journal.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#caf0f8",
+  "theme_color": "#0077b6",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

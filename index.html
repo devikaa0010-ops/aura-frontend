@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Journal - Capture Your Moments</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0077b6">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="auth-screen" class="glass-panel">
+        <div class="auth-container">
+            <h1>welcome to aura<span>.</span></h1>
+            <p>Your beautiful, secure digital journal.</p>
+            <input type="text" id="username" placeholder="Enter your name (for registration)" />
+            <input type="email" id="email" placeholder="Enter your email" />
+            <input type="password" id="password" placeholder="Password" />
+            <div class="auth-buttons">
+                <button id="login-btn" class="primary-btn">Login</button>
+                <button id="register-btn" class="secondary-btn">Register</button>
+            </div>
+            <p id="auth-error" class="error-text"></p>
+        </div>
+    </div>
+
+    <div id="app-container" class="hidden">
+        <aside class="sidebar glass-panel">
+            <div class="logo">
+                <h2>aura<span>.</span></h2>
+            </div>
+            
+            <nav id="main-nav">
+                <a href="#" id="nav-journal" class="active"><i class="fa-solid fa-book"></i> My Journal</a>
+                <a href="#" id="nav-calendar"><i class="fa-solid fa-calendar"></i> Calendar</a>
+                <a href="#" id="nav-insights"><i class="fa-solid fa-chart-pie"></i> Insights</a>
+            </nav>
+
+            <div class="tags-section">
+                <h3>Filter by Tags</h3>
+                <div id="tags-list" class="tags-cloud"></div>
+            </div>
+            
+            <div class="user-profile">
+                <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="user-info">
+                    <span id="current-user-name">User Name</span>
+                    <button id="logout-btn">Logout</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-nav glass-panel">
+                <div class="search-bar">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search entries, tags, or memories..." />
+                </div>
+                <button id="new-entry-btn" class="primary-btn"><i class="fa-solid fa-plus"></i> New Entry</button>
+            </header>
+
+            <div class="journal-feed" id="journal-feed">
+                <!-- Entries will be dynamically rendered here -->
+            </div>
+
+            <div id="coming-soon" class="hidden glass-panel" style="text-align: center; padding: 100px 50px; margin-top: 20px;">
+                <h1 style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"><i class="fa-solid fa-person-digging"></i></h1>
+                <h2>Coming Soon!</h2>
+                <p style="color: var(--text-light); margin-top: 10px;">We're currently brewing up something amazing for this section. Check back later!</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create Entry Modal -->
+    <div id="create-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>New Memory</h2>
+                <button id="close-modal"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="form-group">
+                <input type="text" id="entry-title" placeholder="Give this memory a title..." />
+            </div>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Date</label>
+                    <input type="date" id="entry-date" />
+                </div>
+                <div class="form-group half">
+                    <label>Mood</label>
+                    <div class="mood-selector">
+                        <span class="mood-option" data-mood="😊">😊</span>
+                        <span class="mood-option" data-mood="😢">😢</span>
+                        <span class="mood-option" data-mood="😡">😡</span>
+                        <span class="mood-option" data-mood="😎">😎</span>
+                        <span class="mood-option" data-mood="😴">😴</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <textarea id="entry-content" placeholder="What's heavily on your mind?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Tags (comma separated)</label>
+                <input type="text" id="entry-tags" placeholder="#travel, #food" />
+            </div>
+            <div class="form-group">
+                <label>Add Images (Optional)</label>
+                <input type="file" id="entry-images" accept="image/*" multiple />
+            </div>
+            <button id="save-entry-btn" class="primary-btn full-width">Save Entry</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Aura Journal is now an App!', reg))
+                    .catch(err => console.error('App Registration Failed!', err));
+            });
+        }
+    </script>
+</body>
+</html>
