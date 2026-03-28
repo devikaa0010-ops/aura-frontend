@@ -24,7 +24,8 @@ const searchInput = document.getElementById('search-input');
 const navJournal = document.getElementById('nav-journal');
 const navCalendar = document.getElementById('nav-calendar');
 const navInsights = document.getElementById('nav-insights');
-const comingSoon = document.getElementById('coming-soon');
+const calendarView = document.getElementById('calendar-view');
+const insightsView = document.getElementById('insights-view');
 
 // Initialization
 function init() {
@@ -49,21 +50,28 @@ function showApp() {
 }
 
 // Navigation functionality
-function switchTab(activeNav, showFeed) {
+function switchTab(activeNav) {
     [navJournal, navCalendar, navInsights].forEach(n => n?.classList.remove('active'));
     activeNav?.classList.add('active');
-    if (showFeed) {
+    
+    journalFeed.classList.add('hidden');
+    if(calendarView) calendarView.classList.add('hidden');
+    if(insightsView) insightsView.classList.add('hidden');
+    
+    if (activeNav === navJournal) {
         journalFeed.classList.remove('hidden');
-        comingSoon.classList.add('hidden');
-    } else {
-        journalFeed.classList.add('hidden');
-        comingSoon.classList.remove('hidden');
+    } else if (activeNav === navCalendar) {
+        if(calendarView) calendarView.classList.remove('hidden');
+        renderCalendar();
+    } else if (activeNav === navInsights) {
+        if(insightsView) insightsView.classList.remove('hidden');
+        renderInsights();
     }
 }
 
-navJournal?.addEventListener('click', (e) => { e.preventDefault(); switchTab(navJournal, true); });
-navCalendar?.addEventListener('click', (e) => { e.preventDefault(); switchTab(navCalendar, false); });
-navInsights?.addEventListener('click', (e) => { e.preventDefault(); switchTab(navInsights, false); });
+navJournal?.addEventListener('click', (e) => { e.preventDefault(); switchTab(navJournal); });
+navCalendar?.addEventListener('click', (e) => { e.preventDefault(); switchTab(navCalendar); });
+navInsights?.addEventListener('click', (e) => { e.preventDefault(); switchTab(navInsights); });
 
 // Authentication
 loginBtn.addEventListener('click', async () => {
@@ -335,3 +343,93 @@ function escapeHtml(unsafe) {
 }
 
 init();
+
+// --- NEW FEATURES: Calendar & Insights ---
+function renderCalendar() {
+    const grid = document.getElementById('calendar-grid');
+    if (!grid || currentEntries.length === 0) return;
+    
+    grid.innerHTML = '';
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    days.forEach(d => {
+        grid.innerHTML += `<div style="font-weight: bold; color: var(--text-light); padding-bottom: 10px;">${d}</div>`;
+    });
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    for (let i = 0; i < firstDay; i++) {
+        grid.innerHTML += `<div></div>`;
+    }
+    
+    for (let i = 1; i <= daysInMonth; i++) {
+        // Check if there are entries precisely on this day
+        const dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+        const hasEntry = currentEntries.some(e => e.date === dateStr);
+        
+        const bg = hasEntry ? 'var(--primary)' : 'rgba(0,0,0,0.05)';
+        const color = hasEntry ? '#fff' : 'inherit';
+        const cursor = hasEntry ? 'pointer' : 'default';
+        
+        const dayDiv = document.createElement('div');
+        dayDiv.style.cssText = `padding: 15px 5px; border-radius: 8px; background: ${bg}; color: ${color}; cursor: ${cursor}; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);`;
+        dayDiv.innerText = i;
+        
+        if (hasEntry) {
+            dayDiv.onmouseover = () => dayDiv.style.transform = 'scale(1.1)';
+            dayDiv.onmouseout = () => dayDiv.style.transform = 'scale(1)';
+            dayDiv.onclick = () => {
+                const dayEntries = currentEntries.filter(e => e.date === dateStr);
+                const entriesContainer = document.getElementById('calendar-entries');
+                entriesContainer.innerHTML = `<h3 style="margin-bottom:15px; color: var(--text-dark);">Memories on ${dateStr}</h3>`;
+                
+                dayEntries.forEach(e => {
+                    entriesContainer.innerHTML += `<div style="background:rgba(255,255,255,0.7); padding:15px; border-radius:8px; margin-bottom:10px; border:1px solid var(--glass-border);">
+                        <strong>${e.title || 'Untitled'} ${e.mood || ''}</strong><br>
+                        <p style="font-size:0.9em; margin-top:5px; color:var(--text-light);">${escapeHtml(e.content).substring(0, 100)}...</p>
+                    </div>`;
+                });
+            };
+        }
+        grid.appendChild(dayDiv);
+    }
+}
+
+function renderInsights() {
+    if(!document.getElementById('total-entries-stat')) return;
+    document.getElementById('total-entries-stat').innerText = currentEntries.length;
+    
+    const moodCounts = {};
+    currentEntries.forEach(e => {
+        if(e.mood) {
+            moodCounts[e.mood] = (moodCounts[e.mood] || 0) + 1;
+        }
+    });
+
+    const statsContainer = document.getElementById('mood-stats');
+    statsContainer.innerHTML = '';
+    
+    if(Object.keys(moodCounts).length === 0) {
+        statsContainer.innerHTML = "<p>No moods tracked yet!</p>";
+        return;
+    }
+
+    const maxCount = Math.max(...Object.values(moodCounts));
+    
+    for (const [mood, count] of Object.entries(moodCounts)) {
+        const percentage = Math.round((count / maxCount) * 100);
+        statsContainer.innerHTML += `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem; width: 30px;">${mood}</span>
+                <div style="flex: 1; height: 12px; background: rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden;">
+                    <div style="width: ${percentage}%; height: 100%; background: var(--primary); border-radius: 6px;"></div>
+                </div>
+                <span style="font-size: 0.9rem; font-weight: bold; width: 30px; text-align: right; color: var(--text-dark);">${count}</span>
+            </div>
+        `;
+    }
+}
